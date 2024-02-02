@@ -11,7 +11,6 @@ Create an "Exercise" class with the following specifications:
 5) Secondary Tags
 6) Compound/Isolation Tag
 7) ID
-8) Primary Key(id)
 """
 
 

@@ -10,12 +10,10 @@ Create an "Exercise" class with the following specifications:
 4) Primary Tags
 5) Secondary Tags
 6) Compound/Isolation Tag
-7) ID
 """
 
 
 class Exercise(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     exercise_name = models.CharField(max_length=100)
     num_sets = models.IntegerField(default=0)
     num_reps = models.IntegerField(default=0)
@@ -23,12 +21,23 @@ class Exercise(models.Model):
     secondary_tag = models.CharField(max_length=100, blank=True)
     compound_iso_tag = models.CharField(max_length=100, blank=True)
 
+    def __str__(self):
+        return self.exercise_name
 
 """
-Questions for Mike:
-    - Is a model field required by default unless we specify 'blank=True'?
-    - The ID variable above is an autofill; does this look correct?
+Create an "ExerciseLog" class with the following specifications:
+1) Associated exercise via ForeignKey
+2) Timestamp
+3) Current Set
+4) Current Weight
+5) Target Weight
 """
+class ExerciseLog(models.Model):
+    exercise = models.ForeignKey(Exercise, on_delete=models.CASCADE)
+    time = models.DateTimeField(auto_now_add=True)
+    set = models.IntegerField(default=0)
+    weight = models.FloatField(default=0)
+    target_weight = models.FloatField(default=0)
 
 """
 Create a "Workouts" class with the following specifications:
@@ -41,17 +50,15 @@ Create a "Workouts" class with the following specifications:
 
 
 class Workout(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     workout_name = models.CharField(max_length=100)
     primary_tag = models.CharField(max_length=100, blank=True)
     secondary_tag = models.CharField(max_length=100, blank=True)
-    exercises = models.ManyToManyField('Exercise')
+    exercises = models.ManyToManyField(Exercise)
 
+    def __str__(self):
+        return self.workout_name
+    # Test in use here
 
-"""
-For Mike:
-    - Is the definition of 'exercises' correct here or should the "ManyToManyField" relationship be defined elsewhere?
-"""
 
 """
 Create a "Rotation" class with the following specifications:
@@ -62,29 +69,24 @@ Create a "Rotation" class with the following specifications:
 
 
 class Rotation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    rotation_name = models.CharField(max_length=200)
+    rotation_name = models.CharField(max_length=100)
     workouts = models.ManyToManyField('Workout')
 
+    def __str__(self):
+        return self.rotation_name
 
 """
 Create a "Session" class with the following specifications:
-1) ID
 2) Start time
 3) End time
 4) Selected rotation via ForeignKey
 5) An iterating tracker of specified number of cycles through the selected rotation
 """
 
-"""
-For Mike:
-    - We specified that we wanted the "Macrocycle" section to be internal logic and to skip it for now. I feel like this is the point where that would come into play: defining how many iterations through a Rotation are performed... how do we approach this internally? Do we hardcode it for now?
-"""
-
-
 class Session(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     rotation = models.ForeignKey(Rotation, on_delete=models.CASCADE)
-    # Iterating tracker of (hardcoded for now?) number of cycles through a selected Rotation here...
+    exercise_activity = models.ManyToManyField('ExerciseLog') # set of ExerciseLog
+    # Later implementation: an autoincrementing integer that increments once a rotation is finished:
+    # num_cycle = models.AutoField()

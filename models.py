@@ -55,8 +55,8 @@ class Workout(models.Model):
     secondary_tag = models.CharField(max_length=100, blank=True)
     exercises = models.ManyToManyField(Exercise)
 
-    def __str__(self):
-        return self.workout_name
+    # def __str__(self):
+    #     return self.workout_name
     # Test in use here
 
 
